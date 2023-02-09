@@ -290,6 +290,9 @@ class EeSymbolInfo:
     datasheet: str = ""
     lcsc_id: str = ""
     jlc_id: str = ""
+    mpn: str = ""
+    description: str = ""
+    value: str = ""
 
 
 @dataclass

@@ -129,11 +129,26 @@ class KiExportConfigV6(Enum):
     FIELD_OFFSET_START = 5.08
     FIELD_OFFSET_INCREMENT = 2.54
 
+@dataclass
+class KiSymbolPingFlags:
+    hide: bool
+
+@dataclass
+class KiSymbolAttributes:
+    hide_pin_names: bool = False
+
+    def export_v6(self) -> List[str]:
+        if self.hide_pin_names:
+            return ["\n(pin_numbers hide)", "\n(pin_names hide)"]
+        return []
 
 # ---------------- INFO HEADER ----------------
 @dataclass
 class KiSymbolInfo:
     name: str
+    description: str
+    mpn: str
+    value: str
     prefix: str
     package: str
     manufacturer: str
@@ -238,7 +253,7 @@ class KiSymbolInfo:
             ),
             property_template.format(
                 key="Value",
-                value=self.name,
+                value=self.value or self.name,
                 id_=1,
                 pos_y=self.y_low - field_offset_y,
                 font_size=KiExportConfigV6.PROPERTY_FONT_SIZE.value,
@@ -305,6 +320,32 @@ class KiSymbolInfo:
                     key="JLC Part",
                     value=self.jlc_id,
                     id_=6,
+                    pos_y=self.y_low - field_offset_y,
+                    font_size=KiExportConfigV6.PROPERTY_FONT_SIZE.value,
+                    style="",
+                    hide="hide",
+                )
+            )
+        if self.description:
+            field_offset_y += KiExportConfigV6.FIELD_OFFSET_INCREMENT.value
+            header.append(
+                property_template.format(
+                    key="Description",
+                    value=self.description,
+                    id_=7,
+                    pos_y=self.y_low - field_offset_y,
+                    font_size=KiExportConfigV6.PROPERTY_FONT_SIZE.value,
+                    style="",
+                    hide="hide",
+                )
+            )
+        if self.mpn:
+            field_offset_y += KiExportConfigV6.FIELD_OFFSET_INCREMENT.value
+            header.append(
+                property_template.format(
+                    key="MPN",
+                    value=self.mpn,
+                    id_=8,
                     pos_y=self.y_low - field_offset_y,
                     font_size=KiExportConfigV6.PROPERTY_FONT_SIZE.value,
                     style="",
@@ -595,6 +636,7 @@ class KiSymbolBezier:
 @dataclass
 class KiSymbol:
     info: KiSymbolInfo
+    attributes: KiSymbolAttributes
     pins: List[KiSymbolPin] = field(default_factory=lambda: [])
     rectangles: List[KiSymbolRectangle] = field(default_factory=lambda: [])
     circles: List[KiSymbolCircle] = field(default_factory=lambda: [])
@@ -634,6 +676,7 @@ class KiSymbol:
 
     def export_v6(self):
         sym_export_data = self.export_handler(kicad_version="6")
+        sym_attributes = sym_export_data.pop("attributes")
         sym_info = sym_export_data.pop("info")
         sym_pins = sym_export_data.pop("pins")
         sym_graphic_items = itertools.chain.from_iterable(sym_export_data.values())
@@ -644,6 +687,7 @@ class KiSymbol:
             (symbol "{library_id}"
               (in_bom yes)
               (on_board yes)
+              {symbol_attributes}
               {symbol_properties}
               (symbol "{library_id}_0_1"
                 {graphic_items}
@@ -654,6 +698,9 @@ class KiSymbol:
             "  ",
         ).format(
             library_id=sanitize_fields(self.info.name),
+            symbol_attributes=textwrap.indent(
+                textwrap.dedent("".join(sym_attributes)), "  " * 2
+            ),
             symbol_properties=textwrap.indent(
                 textwrap.dedent("".join(sym_info)), "  " * 2
             ),

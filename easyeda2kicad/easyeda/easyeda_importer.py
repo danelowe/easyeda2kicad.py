@@ -3,6 +3,7 @@ import json
 import logging
 
 from easyeda2kicad.easyeda.easyeda_api import EasyedaApi
+from easyeda2kicad.easyeda.metadata_providers import MetadataProvider
 from easyeda2kicad.easyeda.parameters_easyeda import *
 
 
@@ -117,16 +118,9 @@ class EasyedaSymbolImporter:
         return self.output
 
     def extract_easyeda_data(self, ee_data: dict, ee_data_info: dict) -> EeSymbol:
+        metadata_provider = MetadataProvider()
         new_ee_symbol = EeSymbol(
-            info=EeSymbolInfo(
-                name=ee_data_info["name"],
-                prefix=ee_data_info["pre"],
-                package=ee_data_info.get("package", None),
-                manufacturer=ee_data_info.get("BOM_Manufacturer", None),
-                datasheet=ee_data["lcsc"].get("url", None),
-                lcsc_id=ee_data["lcsc"].get("number", None),
-                jlc_id=ee_data_info.get("BOM_JLCPCB Part Class", None),
-            ),
+            info=metadata_provider.info(ee_data, ee_data_info),
             bbox=EeSymbolBbox(
                 x=float(ee_data["dataStr"]["head"]["x"]),
                 y=float(ee_data["dataStr"]["head"]["y"]),

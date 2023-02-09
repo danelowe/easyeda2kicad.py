@@ -300,6 +300,9 @@ def convert_to_kicad(ee_symbol: EeSymbol, kicad_version: KicadVersion) -> KiSymb
 
     ki_info = KiSymbolInfo(
         name=ee_symbol.info.name,
+        description=ee_symbol.info.description,
+        value=ee_symbol.info.value,
+        mpn = ee_symbol.info.mpn,
         prefix=ee_symbol.info.prefix.replace("?", ""),
         package=ee_symbol.info.package,
         manufacturer=ee_symbol.info.manufacturer,
@@ -308,8 +311,12 @@ def convert_to_kicad(ee_symbol: EeSymbol, kicad_version: KicadVersion) -> KiSymb
         jlc_id=ee_symbol.info.jlc_id,
     )
 
+
     kicad_symbol = KiSymbol(
         info=ki_info,
+        attributes=KiSymbolAttributes(
+            hide_pin_names = all([not pin.name.is_displayed for pin in ee_symbol.pins])
+        ),
         pins=convert_ee_pins(
             ee_pins=ee_symbol.pins, ee_bbox=ee_symbol.bbox, kicad_version=kicad_version
         ),

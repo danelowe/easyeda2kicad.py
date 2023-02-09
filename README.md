@@ -38,6 +38,15 @@ If this tool has saved you a lot of time when designing a PCB, please consider s
 pip install easyeda2kicad
 ```
 
+### To Install this fork in editable mode.
+
+Installing in editable mode means you can edit the code in this directory, 
+and changes will automatically be reflected in the installed package.
+
+```bash
+sudo pip install -e .
+```
+
 ## 💻 Usage
 
 ```bash
