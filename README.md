@@ -39,12 +39,9 @@ pip install easyeda2kicad
 ```
 
 ### To Install this fork in editable mode.
-
-Installing in editable mode means you can edit the code in this directory, 
-and changes will automatically be reflected in the installed package.
-
-```bash
-sudo pip install -e .
+```shell
+poetry install
+poetry run easyeda2kicad --lcsc_id=C13643 --symbol --footprint
 ```
 
 ## 💻 Usage

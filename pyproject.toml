@@ -1,3 +1,23 @@
+[tool.poetry]
+name = "easyeda2kicad"
+version = "0.1.0"
+description = ""
+authors = ["Dane Lowe <dane.r.lowe@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+pre-commit = "^2.17.0"
+pydantic = "^1.5"
+requests = "^2.0.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.scripts]
+easyeda2kicad = 'easyeda2kicad.__main__:main'
+
 [tool.black]
 line-length = 88
 preview = true
